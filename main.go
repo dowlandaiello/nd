@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/adrg/xdg"
+	"github.com/mitchellh/go-homedir"
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v2"
 )
@@ -19,13 +20,36 @@ type Time struct {
 	Cmd *string
 }
 
-// Config is a configuration file representation comprised by a slice of links.
-type Config map[string]struct {
+// Link represents a conditional symlink.
+type Link struct {
 	Day   *Time
 	Night *Time
 
 	To string
 }
+
+// NormalizePath expands the path contained in a link.
+func (l *Link) NormalizePath() error {
+	var err error
+
+	l.To, err = homedir.Expand(l.To)
+	if err != nil {
+		return err
+	}
+
+	if l.Day != nil {
+		l.Day.From, err = homedir.Expand(l.Day.From)
+	}
+
+	if l.Night != nil {
+		l.Night.From, err = homedir.Expand(l.Night.From)
+	}
+
+	return err
+}
+
+// Config is a configuration file representation comprised by a slice of links.
+type Config map[string]Link
 
 func main() {
 	app := &cli.App{
@@ -56,6 +80,11 @@ func main() {
 			}
 
 			for i, link := range links {
+				err = link.NormalizePath()
+				if err != nil {
+					return err
+				}
+
 				var linkNode *Time
 
 				switch time {
