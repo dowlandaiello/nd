@@ -22,6 +22,23 @@ vim:
     from: ~/.vimrc.night
 ```
 
+Or, if you'd like to toggle between two tmux configs and reload tmux at the
+same time (cmd is optional here, and just allows for a live reload):
+
+```yml
+(~/.config/nd/links.yml)
+vim:
+...
+tmux:
+  to: ~/.tmux.conf
+  day:
+    from: ~/.tmux.day.conf
+    cmd: tmux source-file ~/.tmux.conf
+  night:
+    from: ~/.tmux.night.conf
+    cmd: tmux source-file ~/.tmux.conf
+```
+
 Toggling between the two aforementioned vimrc files is as simple as `nd day` or
 `nd night`!
 
